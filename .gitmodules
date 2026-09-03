@@ -1,0 +1,6 @@
+[submodule "project_0/cg_project_1"]
+	path = project_0/cg_project_1
+	url = https://github.com/tysuprawee/cg_project_1.git
+[submodule "project_0/ogl-master"]
+	path = project_0/ogl-master
+	url = https://github.com/tysuprawee/ogl-master.git
