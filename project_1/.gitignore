@@ -1,0 +1,14 @@
+**/*.dll
+**/*.exe
+build/*
+source/p1
+bin-*/*
+distrib/build_*/*
+**.bak
+**.orig
+screenshot.bmp
+*.pyc
+Thumbs.db
+OpenGL-tutorial_v*
+**.mtl
+.DS_Store

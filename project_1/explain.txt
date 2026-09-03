@@ -1,0 +1,12 @@
+AI Assistance Disclosure
+=========================
+Course: CAP 5705 Computer Graphics, Fall 2026
+Student: Pongpeeradech, Suprawee (UFID 34287548)
+
+AI Tool Used
+------------
+Claude Code (Anthropic)
+
+Prompt
+------
+"Fix the build config so this compiles and runs on macOS with the current CMake version"
