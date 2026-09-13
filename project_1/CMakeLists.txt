@@ -50,8 +50,10 @@ add_definitions(
 )
 
 
-add_executable(p1
-	source/main.cpp
+# Sources shared by every task executable.
+set(SHARED_SOURCES
+	source/window.cpp
+	source/window.hpp
 	source/meshObject.cpp
 	source/meshObject.hpp
 	source/gridObject.cpp
@@ -66,7 +68,7 @@ add_executable(p1
 	common/objloader.hpp
 	common/vboindexer.cpp
 	common/vboindexer.hpp
-	
+
 	source/meshVertexShader.glsl
 	source/meshFragmentShader.glsl
 	source/gridVertexShader.glsl
@@ -74,15 +76,34 @@ add_executable(p1
 	source/pickingVertexShader.glsl
 	source/pickingFragmentShader.glsl
 )
-target_link_libraries(p1
-	${ALL_LIBS}
-)
-# Xcode and Visual working directories
-set_target_properties(p1 PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/source/")
-if (MSVC)
-create_target_launcher(p1 WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/source/")
-endif()
 
+# One executable per task, so each can be demonstrated on its own:
+#   p1 = Task 1 grid, p2 = Task 2 camera, p3 = Task 3 robot arm.
+# They all run from source/, which is where the shaders and .obj files live.
+function(add_task_executable target mainFile)
+	add_executable(${target} ${mainFile} ${SHARED_SOURCES})
+	target_link_libraries(${target} ${ALL_LIBS})
+
+	# Xcode and Visual working directories
+	set_target_properties(${target} PROPERTIES
+		XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/source/")
+	if (MSVC)
+		create_target_launcher(${target} WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/source/")
+	endif()
+
+	if (NOT ${CMAKE_GENERATOR} MATCHES "Xcode")
+		add_custom_command(
+			TARGET ${target} POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy
+				"${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${target}${CMAKE_EXECUTABLE_SUFFIX}"
+				"${CMAKE_CURRENT_SOURCE_DIR}/source/"
+		)
+	endif()
+endfunction()
+
+add_task_executable(p1 source/main_task1.cpp)
+add_task_executable(p2 source/main_task2.cpp)
+add_task_executable(p3 source/main_task3.cpp)
 
 
 SOURCE_GROUP(common REGULAR_EXPRESSION ".*/common/.*" )
