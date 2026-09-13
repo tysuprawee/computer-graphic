@@ -34,9 +34,7 @@ int main() {
     
     //TODO: P1aTask3 - Create each robot arm piece by creating instances class meshObject.
     gridObject grid;
-    meshObject obj;
     // TODO: P1aTask3 - Translate each robot arm piece to its approapriate location
-    obj.translate(glm::vec3(0,0,3));
     
     // TODO: P1bTask4 - Create a hierarchical structure and adjust the relative translations.
 
@@ -72,7 +70,7 @@ int main() {
         
         //TODO: P1aTask2 - Create the view matrix based on camera angles.
         glm::mat4 viewMatrix = glm::lookAt(
-            glm::vec3(0, 0, -5),   // Camera position
+            glm::vec3(10, 8, 10),   // Camera position
             glm::vec3(0.0f),  // Look at the origin
             glm::vec3(0, 1, 0)  // Head is looking up at the origin (set to 0,-1,0 to look upside-down)
         );
@@ -81,7 +79,6 @@ int main() {
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)){
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             //TODO: P1bBonus2 draw all robort arm pieces using drawPicking function
-            obj.drawPicking(viewMatrix, projectionMatrix);
             currSelected = getPickedId();
             
             std::cout << "Picked id: " << currSelected << std::endl;
@@ -99,7 +96,6 @@ int main() {
         
         //TODO: P1aTask3 - Draw all robot arm pieces.
         grid.draw(viewMatrix, projectionMatrix);
-        obj.draw(viewMatrix, projectionMatrix);
         
         //TODO: P1bTask4 - Draw the robot arm pieces using the hierachy instead. Call the draw function on the root node. The remeaining pieces will be drawn using recursive calls.
 
