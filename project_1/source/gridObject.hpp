@@ -13,7 +13,6 @@ public:
 
     void draw(const glm::mat4& view, const glm::mat4& projection);
 
-
 private:
     GLuint VAO, VBO, EBO;
     GLuint shaderProgram;

@@ -8,7 +8,6 @@
 int meshObject::nextId = 1;
 std::map<int, meshObject*> meshObject::meshObjectMap;
 
-// P1aTask3 - Build the object from a triangulated .obj file.
 meshObject::meshObject(const std::string& objPath) : id(nextId++) { // Assign current value of nextId to id and increment it
     
     // Add this object to the map
@@ -17,8 +16,6 @@ meshObject::meshObject(const std::string& objPath) : id(nextId++) { // Assign cu
     // Initialize the model matrix
     modelMatrix = glm::mat4(1.0f);
 
-    // P1aTask3 - Read the geometry from the obj file. The supplied loader already
-    // welds each unique position/uv/normal triple and hands back an index buffer.
     std::vector<glm::vec3> positions;
     std::vector<glm::vec2> uvs;
     std::vector<glm::vec3> normals;
@@ -27,17 +24,13 @@ meshObject::meshObject(const std::string& objPath) : id(nextId++) { // Assign cu
         std::cerr << "Failed to load " << objPath << std::endl;
     }
 
-    // P1bTask5 - Interleave the normals with the positions so the lighting pass
-    // can read them straight out of the same buffer.
+    //TODO: P1bTask5 - Create normal buffer.
     std::vector<GLfloat> vertices;
-    vertices.reserve(positions.size() * 6);
+    vertices.reserve(positions.size() * 3);
     for (size_t i = 0; i < positions.size(); ++i) {
         vertices.push_back(positions[i].x);
         vertices.push_back(positions[i].y);
         vertices.push_back(positions[i].z);
-        vertices.push_back(normals[i].x);
-        vertices.push_back(normals[i].y);
-        vertices.push_back(normals[i].z);
     }
 
     numIndices = (GLsizei)indices.size();
@@ -55,12 +48,8 @@ meshObject::meshObject(const std::string& objPath) : id(nextId++) { // Assign cu
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
-    // Vertex attributes: 0 = position, 1 = normal, 6 floats per vertex.
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
 
@@ -88,14 +77,7 @@ void meshObject::draw(const glm::mat4& view, const glm::mat4& projection) {
     GLuint matrixID = glGetUniformLocation(shaderProgram, "MVP");
     glUniformMatrix4fv(matrixID, 1, GL_FALSE, glm::value_ptr(MVP));
     
-    // P1bTask5 - The lighting needs the model matrix on its own to rotate the
-    // normals, since MVP also carries the view and projection.
-    GLuint modelID = glGetUniformLocation(shaderProgram, "M");
-    glUniformMatrix4fv(modelID, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-
-    // P1bTask4 - Tell the shader whether this is the selected piece.
-    GLuint highlightID = glGetUniformLocation(shaderProgram, "highlight");
-    glUniform1f(highlightID, selected ? 1.0f : 0.0f);
+    //TODO: P1bTask5 - Send lighting info to shader using uniform. May also need to send the model matrix seperatily as a uniform.
 
     // Draw the object
     glBindVertexArray(VAO);
@@ -106,12 +88,6 @@ void meshObject::draw(const glm::mat4& view, const glm::mat4& projection) {
 void meshObject::translate(const glm::vec3& translation) {
     // Apply translation to the model matrix
     modelMatrix = glm::translate(modelMatrix, translation);
-}
-
-void meshObject::resetTransform() {
-    // Rebuilding the joint chain every frame needs a clean slate, otherwise
-    // each frame's rotations would pile on top of the previous frame's.
-    modelMatrix = glm::mat4(1.0f);
 }
 
 void meshObject::rotate(float angle, const glm::vec3& axis) {

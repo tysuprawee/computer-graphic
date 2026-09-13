@@ -1,4 +1,3 @@
-// window.cpp - window and GL context setup, shared by all three task programs.
 #include "window.hpp"
 #include <iostream>
 #include <cstdio>
