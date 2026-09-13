@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
+#include <cmath>
 #include "meshObject.hpp"
 #include "gridObject.hpp"
 
@@ -26,8 +27,9 @@ int main() {
     
     if (initWindow() != 0) return -1;
 
-    // Projection matrix : 45� Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-    glm::mat4 projectionMatrix = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
+    // Projection matrix : 45 degree Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+    // Note: glm::perspective expects the FoV in radians.
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
     // Or, for Project 2, use an ortho camera :
     // gProjectionMatrix = glm::ortho(-4.0f, 4.0f, -3.0f, 3.0f, 0.0f, 100.0f); // In world coordinates
 
@@ -38,17 +40,27 @@ int main() {
     
     // TODO: P1bTask4 - Create a hierarchical structure and adjust the relative translations.
 
-    //TODO: P1aTask2 - Create variables to keep track of camera angles.
+    // P1aTask2 - Camera angles. The camera orbits the origin on a sphere of fixed
+    // radius: theta runs along the blue circle parallel to the equator, phi runs
+    // along the red circle orthogonal to it.
+    float cameraRadius = 16.0f;
+    float cameraTheta = glm::radians(45.0f);
+    float cameraPhi = glm::radians(30.0f);
+    const float cameraSpeed = glm::radians(90.0f); // radians per second
     
     //TODO: P1bTask5 - Create variables to store lighting info.
     
     
     double lastTime = glfwGetTime();
+    double lastFrameTime = glfwGetTime();
     int nbFrames = 0;
     do {
         
         // Timing
         double currentTime = glfwGetTime();
+        // Seconds since the previous frame, so camera motion is frame rate independent.
+        float deltaTime = float(currentTime - lastFrameTime);
+        lastFrameTime = currentTime;
         nbFrames++;
         if (currentTime - lastTime >= 1.0){ // If last prinf() was more than 1sec ago
             printf("%f ms/frame\n", 1000.0 / double(nbFrames));
@@ -56,23 +68,46 @@ int main() {
             lastTime += 1.0;
         }
         
-        //TODO: P1aTask2 - set currSelected to 0 when key c is pressed.
+        // P1aTask2 - Press C to select the camera.
+        if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
+            currSelected = 0;
+        }
         
+        // P1aTask2 - Left/Right walk the camera along the blue equatorial circle.
         if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && currSelected == 0) {
-            //TODO: P1aTask2 - adjust the camera rotation.
-            // Note: to make adjustments independent of frame rate, use time since last frame to make adjustment.
+            cameraTheta -= cameraSpeed * deltaTime;
         }
         if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && currSelected == 0) {
-            //TODO: P1aTask2 - adjust the camera rotation.
+            cameraTheta += cameraSpeed * deltaTime;
         }
         
-        //TODO: P1aTask2 - Add the cases for movment along the other axis.
+        // P1aTask2 - Up/Down rotate the camera along the red orthogonal circle.
+        if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS && currSelected == 0) {
+            cameraPhi += cameraSpeed * deltaTime;
+        }
+        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS && currSelected == 0) {
+            cameraPhi -= cameraSpeed * deltaTime;
+        }
         
-        //TODO: P1aTask2 - Create the view matrix based on camera angles.
+        // P1aTask2 - Create the view matrix based on camera angles.
+        glm::vec3 cameraPosition(
+            cameraRadius * std::cos(cameraPhi) * std::sin(cameraTheta),
+            cameraRadius * std::sin(cameraPhi),
+            cameraRadius * std::cos(cameraPhi) * std::cos(cameraTheta)
+        );
+        // The up vector is the tangent to the red orbit at the camera's position.
+        // It is perpendicular to the view direction for every phi, so the camera
+        // keeps pointing at the origin even when it passes over the poles, where a
+        // fixed (0,1,0) up would collapse and make lookAt degenerate.
+        glm::vec3 cameraUp(
+            -std::sin(cameraPhi) * std::sin(cameraTheta),
+             std::cos(cameraPhi),
+            -std::sin(cameraPhi) * std::cos(cameraTheta)
+        );
         glm::mat4 viewMatrix = glm::lookAt(
-            glm::vec3(10, 8, 10),   // Camera position
+            cameraPosition,   // Camera position
             glm::vec3(0.0f),  // Look at the origin
-            glm::vec3(0, 1, 0)  // Head is looking up at the origin (set to 0,-1,0 to look upside-down)
+            cameraUp          // Up direction, tangent to the orbit
         );
         
         // Draw picking for P1bBonus2
