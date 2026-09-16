@@ -4,6 +4,7 @@ build/*
 source/p1
 source/p2
 source/p3
+source/p1b
 bin-*/*
 distrib/build_*/*
 **.bak

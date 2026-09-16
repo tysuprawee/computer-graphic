@@ -75,6 +75,8 @@ set(SHARED_SOURCES
 	source/gridFragmentShader.glsl
 	source/pickingVertexShader.glsl
 	source/pickingFragmentShader.glsl
+	source/phongVertexShader.glsl
+	source/phongFragmentShader.glsl
 )
 
 # One executable per task, so each can be demonstrated on its own:
@@ -104,6 +106,10 @@ endfunction()
 add_task_executable(p1 source/main_task1.cpp)
 add_task_executable(p2 source/main_task2.cpp)
 add_task_executable(p3 source/main_task3.cpp)
+
+# Project 1b: tasks 4, 5 and 6 all act on the same robot arm scene, so they
+# share one executable.
+add_task_executable(p1b source/main_p1b.cpp)
 
 
 SOURCE_GROUP(common REGULAR_EXPRESSION ".*/common/.*" )
